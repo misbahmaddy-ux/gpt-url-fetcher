@@ -13,6 +13,13 @@ def handler(request):
         data = request.json()
         url = data.get("url")
 
+        if not url:
+            return {
+                "statusCode": 400,
+                "headers": {"Content-Type": "application/json"},
+                "body": {"error": "Missing 'url' in request body"}
+            }
+
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
@@ -23,7 +30,7 @@ def handler(request):
             return {
                 "statusCode": response.status_code,
                 "headers": {"Content-Type": "application/json"},
-                "body": {"error": f"Failed to fetch: {response.status_code}"}
+                "body": {"error": f"Failed to fetch content. Status code: {response.status_code}"}
             }
 
         soup = BeautifulSoup(response.text, "html.parser")
