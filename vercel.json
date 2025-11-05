@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/fetch.py",
-      "use": "@vercel/python"
+      "src": "api/fetch.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "api/fetch.py"
+      "src": "/api/fetch",
+      "dest": "api/fetch.js"
     }
   ]
 }
