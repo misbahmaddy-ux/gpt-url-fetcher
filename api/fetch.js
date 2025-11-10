@@ -13,21 +13,38 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Fetch full HTML
     const response = await axios.get(url, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       },
+      responseType: "text",
       timeout: 10000
     });
 
-    const $ = cheerio.load(response.data);
-    const fullText = $("body").text().replace(/\s+/g, " ").trim();
+    // Load HTML into Cheerio
+    const html = response.data;
+    const $ = cheerio.load(html);
 
-    // Truncate output to max 10,000 characters
-    const output = fullText.length > 10000 ? fullText.slice(0, 10000) : fullText;
+    // Extract readable text
+    const text = $("body").text().replace(/\s+/g, " ").trim();
 
-    return res.status(200).json({ text: output });
+    // Truncate if needed (for payload safety)
+    const maxLength = 200000;
+    const safeHTML = html.length > maxLength ? html.slice(0, maxLength) : html;
+    const safeText = text.length > maxLength ? text.slice(0, maxLength) : text;
+
+    // ✅ Return both HTML and parsed text
+    return res.status(200).json({
+      url,
+      html: safeHTML,
+      text: safeText,
+      length: {
+        html: safeHTML.length,
+        text: safeText.length
+      }
+    });
   } catch (error) {
     return res.status(500).json({
       error: error.message || "Failed to fetch content."
